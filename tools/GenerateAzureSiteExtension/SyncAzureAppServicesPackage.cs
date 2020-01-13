@@ -2,7 +2,7 @@ using System.IO;
 using Datadog.Core.Tools;
 using PrepareRelease.Tools;
 
-namespace PrepareRelease
+namespace GenerateAzureSiteExtension
 {
     public static class SyncAzureAppServicesPackage
     {

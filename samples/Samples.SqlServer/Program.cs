@@ -10,7 +10,7 @@ namespace Samples.SqlServer
 {
     internal static class Program
     {
-        private static async Task Main()
+        private static async Task Main(string[] args)
         {
             using (var root = Tracer.Instance.StartActive("root"))
             {

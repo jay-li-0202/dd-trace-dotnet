@@ -1,3 +1,5 @@
+using GenerateAzureSiteExtension;
+
 namespace PrepareRelease
 {
     public class Program

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,12 +30,16 @@ namespace Datadog.Trace
         /// </summary>
         private static int _liveTracerCount;
 
+        private static Task _traceAgentMonitor;
+        private static Task _dogStatsDMonitor;
+
         private readonly IScopeManager _scopeManager;
         private readonly IAgentWriter _agentWriter;
         private readonly Timer _heartbeatTimer;
 
         static Tracer()
         {
+            StartStandaloneAgentProcessesWhenConfigured();
             // create the default global Tracer
             Instance = new Tracer();
         }
@@ -359,6 +364,130 @@ namespace Datadog.Trace
 
             var statsdUdp = new StatsdUDP(settings.AgentUri.DnsSafeHost, settings.DogStatsdPort, StatsdConfig.DefaultStatsdMaxUDPPacketSize);
             return new Statsd(statsdUdp, new RandomGenerator(), new StopWatchFactory(), prefix: string.Empty, constantTags);
+        }
+
+        private static void StartStandaloneAgentProcessesWhenConfigured()
+        {
+            try
+            {
+                var datadogConfigPath = Environment.GetEnvironmentVariable(ConfigurationKeys.AgentConfigPath);
+                string traceProcessArgs = null;
+                string dogStatsDArgs = null;
+
+                if (!string.IsNullOrWhiteSpace(datadogConfigPath))
+                {
+                    traceProcessArgs = $"--config \"{datadogConfigPath}\"";
+                }
+
+                _traceAgentMonitor = StartProcessWithKeepAlive(ConfigurationKeys.AgentPath, traceProcessArgs);
+                _dogStatsDMonitor = StartProcessWithKeepAlive(ConfigurationKeys.DogStatsDPath, dogStatsDArgs);
+            }
+            catch (Exception ex)
+            {
+                DatadogLogging.RegisterStartupLog(log => log.Error(ex, "Error when attempting to start standalone agent processes."));
+            }
+        }
+
+        private static bool ProgramIsRunning(string fullPath)
+        {
+            if (string.IsNullOrWhiteSpace(fullPath))
+            {
+                return false;
+            }
+
+            var fileName = Path.GetFileNameWithoutExtension(fullPath).ToLower();
+            var processesByName = Process.GetProcessesByName(fileName);
+
+            if (processesByName.Length > 0)
+            {
+                // We enforce a unique enough naming within contexts where we would use sub-processes
+                return true;
+            }
+
+            return false;
+        }
+
+        private static Task StartProcessWithKeepAlive(string processPathVariable, string args)
+        {
+            DatadogLogging.RegisterStartupLog(log => log.Debug("Starting keep alive for {0}.", processPathVariable));
+
+            return Task.Run(
+                () =>
+                {
+                    try
+                    {
+                        var circuitBreakerMax = 3;
+                        var sequentialFailures = 0;
+
+                        while (true)
+                        {
+                            string path = null;
+
+                            try
+                            {
+                                path = Environment.GetEnvironmentVariable(processPathVariable);
+
+                                if (!string.IsNullOrWhiteSpace(path))
+                                {
+                                    if (ProgramIsRunning(path))
+                                    {
+                                        DatadogLogging.RegisterStartupLog(log => log.Debug("{0} at {1} is already running.", processPathVariable, path));
+                                        continue;
+                                    }
+
+                                    var startInfo = new ProcessStartInfo { FileName = path };
+
+                                    if (!string.IsNullOrWhiteSpace(args))
+                                    {
+                                        startInfo.Arguments = args;
+                                    }
+
+                                    DatadogLogging.RegisterStartupLog(log => log.Debug("Starting {0} at {1}.", processPathVariable, path));
+
+                                    var process = Process.Start(startInfo);
+
+                                    Thread.Sleep(150);
+
+                                    if (process == null || process.HasExited)
+                                    {
+                                        DatadogLogging.RegisterStartupLog(log => log.Error("{0} at {1} has failed to start.", processPathVariable, path));
+                                        sequentialFailures++;
+                                    }
+                                    else
+                                    {
+                                        DatadogLogging.RegisterStartupLog(log => log.Debug("Successfully started {0} at {1}.", processPathVariable, path));
+                                        sequentialFailures = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    DatadogLogging.RegisterStartupLog(log => log.Debug("There is no path configured for {0}.", processPathVariable));
+                                    return;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                DatadogLogging.RegisterStartupLog(log => log.Error(ex, "Exception when trying to start an instance of {0} at {1}.", processPathVariable, path));
+                                sequentialFailures++;
+                            }
+                            finally
+                            {
+                                // Make sure to delay every loop
+                                Thread.Sleep(20_000);
+                            }
+
+                            if (sequentialFailures >= circuitBreakerMax)
+                            {
+                                DatadogLogging.RegisterStartupLog(log => log.Error("Circuit breaker triggered for {0} at {1}.", processPathVariable, path));
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        DatadogLogging.RegisterStartupLog(log => log.Debug("Keep alive is dropping for {0}.", processPathVariable));
+                    }
+                });
         }
 
         private void InitializeLibLogScopeEventSubscriber(IScopeManager scopeManager)

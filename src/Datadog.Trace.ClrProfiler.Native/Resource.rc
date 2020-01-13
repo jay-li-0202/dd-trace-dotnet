@@ -68,28 +68,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Datadog, Inc."
             VALUE "FileDescription", "Datadog CLR Profiler"
-<<<<<<< HEAD
-<<<<<<< HEAD
             VALUE "FileVersion", "1.11.1.0"
-=======
-            VALUE "FileVersion", "1.10.7.0"
->>>>>>> e905568... More adjustments
-=======
-            VALUE "FileVersion", "1.10.28.0"
->>>>>>> 573c217... Start things from the profiler
             VALUE "InternalName", "Datadog.Trace.ClrProfiler.Native.DLL"
             VALUE "LegalCopyright", "Copyright (C) 2017-2019"
             VALUE "OriginalFilename", "Datadog.Trace.ClrProfiler.Native.DLL"
             VALUE "ProductName", "Datadog .NET Tracer"
-<<<<<<< HEAD
-<<<<<<< HEAD
             VALUE "ProductVersion", "1.11.1"
-=======
-            VALUE "ProductVersion", "1.10.7"
->>>>>>> e905568... More adjustments
-=======
-            VALUE "ProductVersion", "1.10.28"
->>>>>>> 573c217... Start things from the profiler
         END
     END
     BLOCK "VarFileInfo"

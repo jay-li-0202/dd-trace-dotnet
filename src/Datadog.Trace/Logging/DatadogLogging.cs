@@ -1,4 +1,6 @@
 using System;
+using System.CodeDom;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -15,9 +17,12 @@ namespace Datadog.Trace.Logging
         private static readonly string WindowsDefaultDirectory;
 
         private static readonly long? MaxLogFileSize = 10 * 1024 * 1024;
-        private static readonly LogEventLevel MinimumLogEventLevel = LogEventLevel.Warning;
+        private static readonly LogEventLevel MinimumLogEventLevel = LogEventLevel.Information;
+
+        private static readonly ConcurrentQueue<Action<ILogger>> ActionsToRunWhenLoggerReady = new ConcurrentQueue<Action<ILogger>>();
 
         private static readonly ILogger SharedLogger = null;
+        private static readonly bool Initialized = false;
 
         static DatadogLogging()
         {
@@ -106,17 +111,52 @@ namespace Datadog.Trace.Logging
 
                 SharedLogger = loggerConfiguration.CreateLogger();
 
+                // Use to immediately execute any startup logs
+                Initialized = true;
+
                 // Log some information to correspond with the app domain
-                SharedLogger.Debug(
-                    "OSArchitecture: {0}, OSDescription: {1}, ProcessArchitecture: {2}, FrameworkDescription: {3}",
+                SharedLogger.Information(
+                    "OSArchitecture: {0}, OSDescription: {1}, ProcessArchitecture: {2}, FrameworkDescription: {3}, CLR: {4}",
                     RuntimeInformation.OSArchitecture,
                     RuntimeInformation.OSDescription,
                     RuntimeInformation.ProcessArchitecture,
-                    RuntimeInformation.FrameworkDescription);
+                    RuntimeInformation.FrameworkDescription,
+                    RuntimeEnvironment.GetSystemVersion());
+
+                while (ActionsToRunWhenLoggerReady.TryDequeue(out var loggerAction))
+                {
+                    try
+                    {
+                        loggerAction(SharedLogger);
+                    }
+                    catch (Exception ex)
+                    {
+                        SharedLogger.Error(ex, "Failure on logger startup subscriber");
+                    }
+                }
             }
             catch
             {
                 // nothing to do here
+            }
+        }
+
+        public static void RegisterStartupLog(Action<ILogger> logAction)
+        {
+            try
+            {
+                if (Initialized)
+                {
+                    logAction(SharedLogger);
+                }
+                else
+                {
+                    ActionsToRunWhenLoggerReady.Enqueue(logAction);
+                }
+            }
+            catch
+            {
+                // ignored
             }
         }
 

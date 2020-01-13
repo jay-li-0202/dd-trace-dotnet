@@ -286,7 +286,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.AspNetCoreMvc31", "samples\Samples.AspNetCoreMvc31\Samples.AspNetCoreMvc31.csproj", "{303F8E41-691F-4453-AB7D-88A0036C0465}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.AspNetCoreMvc21", "samples\Samples.AspNetCoreMvc21\Samples.AspNetCoreMvc21.csproj", "{D141BD06-DD95-4CAF-85CD-657116E0DAD4}"
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Datadog.Trace.AzureAppServices", "deploy\AzureAppServices\Datadog.Trace.AzureAppServices.csproj", "{BD818084-A89D-4FF4-9C8A-09A1491B6569}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerateAzureSiteExtension", "tools\GenerateAzureSiteExtension\GenerateAzureSiteExtension.csproj", "{454B9EA7-9B9A-4CB8-B019-988579533BC1}"
 EndProject
