@@ -274,7 +274,7 @@ namespace Datadog.Trace.Configuration
 
         internal bool IsIntegrationEnabled(string name)
         {
-            return TraceEnabled && IntegrationIsNotExplicitlyDisabled(name);
+            return TraceEnabled && !IntegrationIsDisabled(name);
         }
 
         internal double? GetIntegrationAnalyticsSampleRate(string name, bool enabledWithGlobalSetting)
@@ -284,10 +284,10 @@ namespace Datadog.Trace.Configuration
             return analyticsEnabled ? integrationSettings.AnalyticsSampleRate : (double?)null;
         }
 
-        private bool IntegrationIsNotExplicitlyDisabled(string name)
+        private bool IntegrationIsDisabled(string name)
         {
-            return Integrations[name].Enabled != false &&
-            !DisabledIntegrationNames.Contains(name);
+            return Integrations[name].Enabled == false ||
+                DisabledIntegrationNames.Contains(name);
         }
     }
 }
