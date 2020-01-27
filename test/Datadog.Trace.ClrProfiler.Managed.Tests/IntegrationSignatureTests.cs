@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Datadog.Trace.ClrProfiler.Integrations;
+#if !NETCOREAPP2_1 && !NETCOREAPP3_0 && !NETCOREAPP3_1
+using Datadog.Trace.ClrProfiler.Integrations.AspNet;
+#endif
 using Xunit;
 
 namespace Datadog.Trace.ClrProfiler.Managed.Tests
@@ -20,6 +23,9 @@ namespace Datadog.Trace.ClrProfiler.Managed.Tests
              typeof(AspNetCoreMvc3Integration).GetMethod(nameof(AspNetCoreMvc3Integration.Rethrow_ExceptionContextSealed)),
              typeof(AspNetCoreMvc3Integration).GetMethod(nameof(AspNetCoreMvc3Integration.Rethrow_ResourceExecutedContextSealed)),
              typeof(AspNetCoreMvc3Integration).GetMethod(nameof(AspNetCoreMvc3Integration.Rethrow_ResultExecutedContextSealed)),
+#if !NETCOREAPP2_1 && !NETCOREAPP3_0 && !NETCOREAPP3_1
+             typeof(AspNetIntegration).GetMethod(nameof(AspNetIntegration.InvokePreStartInitMethods)),
+#endif
         };
 
         public static IEnumerable<object[]> GetWrapperMethodWithInterceptionAttributes()
