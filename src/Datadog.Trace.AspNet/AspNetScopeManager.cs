@@ -4,32 +4,23 @@ using Datadog.Trace.Logging;
 
 namespace Datadog.Trace.AspNet
 {
-    /// <summary>
-    /// Manage the scope in a AspNet application.
-    /// </summary>
-    public class AspNetScopeManager : IScopeManager
+    internal class AspNetScopeManager : IScopeManager
     {
         private static readonly Vendors.Serilog.ILogger Log = DatadogLogging.For<AspNetScopeManager>();
 
         private readonly string _name = "__Datadog_Scope_Current__" + Guid.NewGuid();
         private readonly AsyncLocalCompat<Scope> _activeScopeFallback = new AsyncLocalCompat<Scope>();
 
-        /// <inheritdoc/>
         public event EventHandler<SpanEventArgs> SpanOpened;
 
-        /// <inheritdoc/>
         public event EventHandler<SpanEventArgs> SpanActivated;
 
-        /// <inheritdoc/>
         public event EventHandler<SpanEventArgs> SpanDeactivated;
 
-        /// <inheritdoc/>
         public event EventHandler<SpanEventArgs> SpanClosed;
 
-        /// <inheritdoc/>
         public event EventHandler<SpanEventArgs> TraceEnded;
 
-        /// <inheritdoc/>
         public Scope Active
         {
             get
@@ -44,7 +35,6 @@ namespace Datadog.Trace.AspNet
             }
         }
 
-        /// <inheritdoc/>
         public Scope Activate(Span span, bool finishOnClose)
         {
             var newParent = Active;
@@ -65,7 +55,6 @@ namespace Datadog.Trace.AspNet
             return scope;
         }
 
-        /// <inheritdoc/>
         public void Close(Scope scope)
         {
             var current = Active;
