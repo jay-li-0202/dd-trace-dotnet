@@ -158,12 +158,12 @@ namespace Datadog.Trace.Configuration
         public const string ProfilerLogPath = "DD_TRACE_LOG_PATH";
 
         /// <summary>
-        /// Configuration key for when a standalone instance of a trace agent needs to be started.
+        /// Configuration key for when a standalone instance of the Trace Agent needs to be started.
         /// </summary>
-        public const string AgentPath = "DD_AGENT_PATH";
+        public const string TraceAgentPath = "DD_TRACE_AGENT_PATH";
 
         /// <summary>
-        /// Configuration key for when a standalone instance of dogstatsd needs to be started.
+        /// Configuration key for when a standalone instance of DogStatsD needs to be started.
         /// </summary>
         public const string DogStatsDPath = "DD_DOGSTATSD_PATH";
 
