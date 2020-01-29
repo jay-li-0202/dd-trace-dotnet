@@ -1,10 +1,9 @@
-using System;
 using System.Threading;
 using Datadog.Trace.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Datadog.Trace.ClrProfiler.IntegrationTests.AdoNet
+namespace Datadog.Trace.ClrProfiler.IntegrationTests.AzureAppServices
 {
     public class FakeKuduTests : TestHelper
     {

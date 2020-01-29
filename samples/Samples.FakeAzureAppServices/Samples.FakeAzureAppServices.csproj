@@ -12,4 +12,11 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
 
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <None Include="$(ProjectDir)$(OutputPath)Samples.FakeAzureAppServices.exe"
+          CopyToOutputDirectory="Always"
+          CopyToPublishDirectory="Always"
+          Link="Samples.FakeTraceAgent%(Extension)" />
+  </ItemGroup>
+
 </Project>

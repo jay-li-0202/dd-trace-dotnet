@@ -198,11 +198,6 @@ namespace Datadog.Trace.TestHelpers
             {
                 environmentVariables[key] = CustomEnvironmentVariables[key];
             }
-
-            foreach (var key in ExtraEnvironmentVariables.Keys)
-            {
-                environmentVariables[key] = ExtraEnvironmentVariables[key];
-            }
         }
 
         public string[] GetIntegrationsFilePaths()

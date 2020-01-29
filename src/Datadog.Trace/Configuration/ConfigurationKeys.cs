@@ -156,6 +156,8 @@ namespace Datadog.Trace.Configuration
         /// or "/var/log/datadog/dotnet-profiler.log" on Linux.
         /// </summary>
         public const string ProfilerLogPath = "DD_TRACE_LOG_PATH";
+
+        /// <summary>
         /// Configuration key for when a standalone instance of a trace agent needs to be started.
         /// </summary>
         public const string AgentPath = "DD_AGENT_PATH";
