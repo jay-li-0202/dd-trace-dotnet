@@ -135,7 +135,7 @@ namespace Datadog.Trace
 
                             if (sequentialFailures >= circuitBreakerMax)
                             {
-                                DatadogLogging.RegisterStartupLog(log => log.Error("Circuit breaker triggered for {0}. Max failed retries reached ({3}).", path, sequentialFailures));
+                                DatadogLogging.RegisterStartupLog(log => log.Error("Circuit breaker triggered for {0}. Max failed retries reached ({1}).", path, sequentialFailures));
                                 break;
                             }
                         }
