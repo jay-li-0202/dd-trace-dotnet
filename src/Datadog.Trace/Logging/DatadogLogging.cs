@@ -115,13 +115,7 @@ namespace Datadog.Trace.Logging
                 Initialized = true;
 
                 // Log some information to correspond with the app domain
-                SharedLogger.Information(
-                    "OSArchitecture: {0}, OSDescription: {1}, ProcessArchitecture: {2}, FrameworkDescription: {3}, CLR: {4}",
-                    RuntimeInformation.OSArchitecture,
-                    RuntimeInformation.OSDescription,
-                    RuntimeInformation.ProcessArchitecture,
-                    RuntimeInformation.FrameworkDescription,
-                    RuntimeEnvironment.GetSystemVersion());
+                SharedLogger.Information(FrameworkDescription.Create().ToString());
 
                 while (ActionsToRunWhenLoggerReady.TryDequeue(out var loggerAction))
                 {
@@ -137,7 +131,9 @@ namespace Datadog.Trace.Logging
             }
             catch
             {
-                // nothing to do here
+                // If for some reason the logger initialization fails, don't let the queue fill
+                Initialized = true;
+                // nothing else to do here
             }
         }
 
