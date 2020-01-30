@@ -67,7 +67,7 @@ namespace Datadog.Trace
             var fileName = Path.GetFileNameWithoutExtension(fullPath);
             var processesByName = Process.GetProcessesByName(fileName);
 
-            if (processesByName.Length > 0)
+            if (processesByName?.Length > 0)
             {
                 // We enforce a unique enough naming within contexts where we would use sub-processes
                 return true;
